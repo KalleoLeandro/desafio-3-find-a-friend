@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+model Owner {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  phone String
+  created_at    DateTime @default(now())
+
+  address Address @relation(fields: [address_id], references: [id])
+  
+  address_id String
+
+  @@map("owner")  
+  Pet Pet[]
+}
+
+model Org {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  password_hash String
+  wppNumber String  
+  role Role @default(MEMBER)
+  created_at    DateTime @default(now())
+
+  address Address @relation(fields: [address_id], references: [id])
+  
+  address_id String
+
+  @@map("orgs")
+  Pet Pet[]
+}
+
+model Pet {
+  id String   @id @default(uuid())
+  name String
+  age Int
+  size Decimal
+  specie String
+  adopted Boolean @default(false)
+
+  org Org @relation(fields: [org_id], references: [id]) 
+  org_id String
+
+  
+  Owner Owner? @relation(fields: [owner_id], references: [id])
+  owner_id String?
+
+  @@map("pets")
+}
+
+model Address {
+  id String @id @default(uuid())
+  zipCode String
+  street String
+  nro Int
+  district String
+  city String
+  state  String
+  
+  Org Org[]
+
+  @@map("address")
+  Owner Owner[]
+}
